@@ -121,7 +121,7 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {filteredAlerts.map((alert) => (
+            {/* {filteredAlerts.map((alert) => (
               <tr key={alert.id}>
                 <td className="alertCard">
                   <Row>
@@ -152,9 +152,9 @@ function App() {
                   </Row>
                 </td>
               </tr>
-            ))}
+            ))} */}
 
-            {/* {filteredAlerts.map(
+            {filteredAlerts.map(
               (alert) =>
                 // Check if the alert is not in the falseAlarms state
                 !falseAlarms.includes(alert) && (
@@ -194,7 +194,7 @@ function App() {
                     </td>
                   </tr>
                 )
-            )} */}
+            )}
           </tbody>
         </Table>
       </Container>
