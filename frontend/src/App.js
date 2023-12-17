@@ -4,13 +4,8 @@ import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Dropdown, Navbar } from 'react-bootstrap';
+import { Button, Col, Dropdown, Navbar, Row } from 'react-bootstrap';
 import data from './data';
-import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
-
-// import 'react-date-range/dist/styles.css'; // main style file
-// import 'react-date-range/dist/theme/default.css'; // theme css file
-// import { DateRangePicker } from 'react-date-range';
 
 function formatLocalTimestamp(utcTimestamp) {
   const options = {
@@ -27,87 +22,179 @@ function formatLocalTimestamp(utcTimestamp) {
 
 function App() {
   const [search, setSearch] = useState('');
-  useEffect(() => {}, []);
-  const selectionRange = {
-    startDate: new Date(),
-    endDate: new Date(),
-    key: 'selection',
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [filteredAlerts, setFilteredAlerts] = useState(data.alerts);
+  // const [dateRange, setDateRange] = useState('');
+  const [falseAlarms, setFalseAlarms] = useState([]);
+
+  useEffect(() => {
+    const searchLowerCase = search.toLowerCase();
+
+    // Filter alerts based on search term and selected vehicle
+    const filteredData = data.alerts.filter(
+      (alert) =>
+        alert.driver_friendly_name.toLowerCase().includes(searchLowerCase) ||
+        alert.alert_type.toLowerCase().includes(searchLowerCase) ||
+        alert.vehicle_friendly_name.toLowerCase().includes(searchLowerCase)
+    );
+
+    if (selectedVehicle) {
+      // If a vehicle is selected, further filter by vehicle friendly name
+      setFilteredAlerts(
+        filteredData.filter(
+          (alert) => alert.vehicle_friendly_name === selectedVehicle
+        )
+      );
+    } else {
+      // If no vehicle is selected, use the entire filtered data
+      setFilteredAlerts(filteredData);
+    }
+  }, [search, selectedVehicle]);
+
+  // Get unique vehicle friendly names for dropdown options
+  const vehicleFriendlyNames = [
+    ...new Set(data.alerts.map((alert) => alert.vehicle_friendly_name)),
+  ];
+  const handleRemoveSelectedVehicle = () => {
+    setFilteredAlerts(data.alerts);
+    setSelectedVehicle(null);
+    setFalseAlarms([]);
+    setSearch('');
   };
-  const handleSelect = (date) => {
-    console.log(date);
+  const handleMarkAsFalseAlarm = (alert) => {
+    setFalseAlarms((prevFalseAlarms) => [...prevFalseAlarms, alert]);
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
   };
   return (
     <div>
       <Container>
-        <Navbar>
-          <Form inline>
-            <InputGroup className="my-3">
-              <Form.Control
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search"
-              />
-            </InputGroup>
-          </Form>
-          <Dropdown>
-            <Dropdown.Toggle variant="success" id="dropdown-basic">
-              Vehicle
-            </Dropdown.Toggle>
+        <Navbar bg="light" expand="md">
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Form onSubmit={handleSubmit}>
+              <InputGroup className="my-3">
+                <Form.Control
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search"
+                />
+              </InputGroup>
+            </Form>
+            <Dropdown
+              className="mx-4 dropdown"
+              onSelect={(eventKey) => setSelectedVehicle(eventKey)}
+            >
+              <Dropdown.Toggle
+                as="div"
+                variant="none"
+                className="ml-2 oulineBorder"
+              >
+                Vehicle #{' '}
+                <Button variant="none" onClick={handleRemoveSelectedVehicle}>
+                  {'  '}X{'  '}
+                </Button>
+              </Dropdown.Toggle>
 
-            <Dropdown.Menu>
-              {data.alerts.map((alert) => (
-                <Dropdown.Item key={alert.id} href="#/action-1">
-                  {alert.vehicle_friendly_name}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
+              <Dropdown.Menu>
+                {vehicleFriendlyNames.map((friendlyName) => (
+                  <Dropdown.Item key={friendlyName} eventKey={friendlyName}>
+                    {friendlyName}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+              <span></span>
+            </Dropdown>
 
-          <Form>
-            <Form.Label>Date Range:</Form.Label>
-            {/* <DateRangePicker
-              ranges={[selectionRange]}
-              onChange={handleSelect}
-            /> */}
-            <DateRangePicker
-              localeText={{ start: 'Check-in', end: 'Check-out' }}
-            />
-          </Form>
+            <Form onSubmit={handleSubmit}>
+              <Form.Label>Date Range:</Form.Label>
+            </Form>
+          </Navbar.Collapse>
         </Navbar>
 
-        <Table striped bordered hover>
+        <Table>
           <thead>
-            <th>
-              <h5>Alerts</h5>
-            </th>
+            <tr>
+              <th>
+                <h5>Alerts</h5>
+              </th>
+            </tr>
           </thead>
           <tbody>
-            {data.alerts
-              .filter((alert) => {
-                const searchLowerCase = search.toLowerCase();
-                return (
-                  searchLowerCase === '' ||
-                  alert.driver_friendly_name
-                    .toLowerCase()
-                    .includes(searchLowerCase) ||
-                  alert.alert_type.toLowerCase().includes(searchLowerCase) ||
-                  alert.vehicle_friendly_name
-                    .toLowerCase()
-                    .includes(searchLowerCase)
-                );
-              })
-              .map((alert) => (
-                <tr key={alert.id}>
-                  <td>
-                    <h6>
-                      {alert.alert_type} {formatLocalTimestamp(alert.timestamp)}
-                    </h6>
-                    <p>
-                      Driver:{alert.driver_friendly_name} /{' '}
-                      {alert.vehicle_friendly_name}
-                    </p>
-                  </td>
-                </tr>
-              ))}
+            {filteredAlerts.map((alert) => (
+              <tr key={alert.id}>
+                <td className="alertCard">
+                  <Row>
+                    <Col md={8}>
+                      <p>
+                        <span className="alert-type">
+                          <b>{alert.alert_type}</b>
+                        </span>{' '}
+                        <span className="alert-date time">
+                          <i class="fa-solid fa-circle"></i>{' '}
+                          {formatLocalTimestamp(alert.timestamp)}
+                        </span>
+                      </p>
+                      <p>
+                        <span style={{ fontSize: 'small' }}>
+                          {'  '}
+                          {alert.driver_friendly_name} /{' '}
+                          {alert.vehicle_friendly_name}
+                        </span>
+                      </p>
+                    </Col>
+                    <Col md={4} className="alarm">
+                      <Button variant="none" size="sm" className="oulineBorder">
+                        <i className="fa-solid fa-bell-slash"></i>
+                        {'    '}Mark As False Alarm
+                      </Button>
+                    </Col>
+                  </Row>
+                </td>
+              </tr>
+            ))}
+
+            {/* {filteredAlerts.map(
+              (alert) =>
+                // Check if the alert is not in the falseAlarms state
+                !falseAlarms.includes(alert) && (
+                  <tr key={alert.id}>
+                    <td className="alertCard">
+                      <Row>
+                        <Col md={8}>
+                          <p>
+                            <span className="alert-type">
+                              <b>{alert.alert_type}</b>
+                            </span>{' '}
+                            <span className="alert-date time">
+                              <i class="fa-solid fa-circle"></i>{' '}
+                              {formatLocalTimestamp(alert.timestamp)}
+                            </span>
+                          </p>
+                          <p>
+                            <span style={{ fontSize: 'small' }}>
+                              {'  '}
+                              {alert.driver_friendly_name} /{' '}
+                              {alert.vehicle_friendly_name}
+                            </span>
+                          </p>
+                        </Col>
+                        <Col md={4} className="alarm">
+                          <Button
+                            variant="none"
+                            size="sm"
+                            className="oulineBorder"
+                            onClick={() => handleMarkAsFalseAlarm(alert)}
+                          >
+                            <i className="fa-solid fa-bell-slash"></i>
+                            {'    '}Mark As False Alarm
+                          </Button>
+                        </Col>
+                      </Row>
+                    </td>
+                  </tr>
+                )
+            )} */}
           </tbody>
         </Table>
       </Container>

@@ -6,3 +6,25 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.time {
+  margin: 2rem;
+  font-size: x-small;
+}
+.alertCard {
+  padding: 0.5rem 2rem;
+}
+.alarm {
+  margin: auto;
+}
+
+.oulineBorder {
+  outline: 1px solid black;
+}
+
+.dropdown {
+  width: 10rem;
+}
+.dropdown .dropdown-toggle {
+  padding: 0rem 1rem;
+}
