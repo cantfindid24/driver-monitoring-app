@@ -121,39 +121,6 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {/* {filteredAlerts.map((alert) => (
-              <tr key={alert.id}>
-                <td className="alertCard">
-                  <Row>
-                    <Col md={8}>
-                      <p>
-                        <span className="alert-type">
-                          <b>{alert.alert_type}</b>
-                        </span>{' '}
-                        <span className="alert-date time">
-                          <i class="fa-solid fa-circle"></i>{' '}
-                          {formatLocalTimestamp(alert.timestamp)}
-                        </span>
-                      </p>
-                      <p>
-                        <span style={{ fontSize: 'small' }}>
-                          {'  '}
-                          {alert.driver_friendly_name} /{' '}
-                          {alert.vehicle_friendly_name}
-                        </span>
-                      </p>
-                    </Col>
-                    <Col md={4} className="alarm">
-                      <Button variant="none" size="sm" className="oulineBorder">
-                        <i className="fa-solid fa-bell-slash"></i>
-                        {'    '}Mark As False Alarm
-                      </Button>
-                    </Col>
-                  </Row>
-                </td>
-              </tr>
-            ))} */}
-
             {filteredAlerts.map(
               (alert) =>
                 // Check if the alert is not in the falseAlarms state
