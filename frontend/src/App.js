@@ -106,7 +106,7 @@ function App() {
 
   return (
     <div>
-      <Container>
+      <Container className="mt-3">
         <Navbar bg="light" expand="md">
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -216,6 +216,9 @@ function App() {
           </tbody>
         </Table>
       </Container>
+      <footer className="footer">
+        Copyright ©️ <u>enview.ai</u> 2023
+      </footer>
     </div>
   );
 }

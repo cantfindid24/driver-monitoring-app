@@ -28,3 +28,9 @@ body {
 .dropdown .dropdown-toggle {
   padding: 0rem 1rem;
 }
+
+.footer {
+  text-align: center;
+  background-color: rgb(224, 224, 224);
+  height: 2rem;
+}
