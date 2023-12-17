@@ -24,7 +24,8 @@ function App() {
   const [search, setSearch] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [filteredAlerts, setFilteredAlerts] = useState(data.alerts);
-  // const [dateRange, setDateRange] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [falseAlarms, setFalseAlarms] = useState([]);
 
   useEffect(() => {
@@ -37,19 +38,28 @@ function App() {
         alert.alert_type.toLowerCase().includes(searchLowerCase) ||
         alert.vehicle_friendly_name.toLowerCase().includes(searchLowerCase)
     );
-
+    // Apply date range filter
+    const filteredByDateRange = filteredData.filter((alert) => {
+      if (startDate && endDate) {
+        const alertDate = new Date(alert.timestamp);
+        return (
+          alertDate >= new Date(startDate) && alertDate <= new Date(endDate)
+        );
+      }
+      return true;
+    });
     if (selectedVehicle) {
       // If a vehicle is selected, further filter by vehicle friendly name
       setFilteredAlerts(
-        filteredData.filter(
+        filteredByDateRange.filter(
           (alert) => alert.vehicle_friendly_name === selectedVehicle
         )
       );
     } else {
       // If no vehicle is selected, use the entire filtered data
-      setFilteredAlerts(filteredData);
+      setFilteredAlerts(filteredByDateRange);
     }
-  }, [search, selectedVehicle]);
+  }, [search, selectedVehicle, startDate, endDate]);
 
   // Get unique vehicle friendly names for dropdown options
   const vehicleFriendlyNames = [
@@ -60,6 +70,8 @@ function App() {
     setSelectedVehicle(null);
     setFalseAlarms([]);
     setSearch('');
+    setStartDate('');
+    setEndDate('');
   };
   const handleMarkAsFalseAlarm = (alert) => {
     setFalseAlarms((prevFalseAlarms) => [...prevFalseAlarms, alert]);
@@ -108,6 +120,22 @@ function App() {
 
             <Form onSubmit={handleSubmit}>
               <Form.Label>Date Range:</Form.Label>
+
+              <InputGroup className="mb-3">
+                <Form.Control
+                  type="date"
+                  placeholder="Start Date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+                <InputGroup.Text>-</InputGroup.Text>
+                <Form.Control
+                  type="date"
+                  placeholder="End Date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </InputGroup>
             </Form>
           </Navbar.Collapse>
         </Navbar>
