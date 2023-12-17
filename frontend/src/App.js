@@ -26,7 +26,7 @@ function App() {
   const [filteredAlerts, setFilteredAlerts] = useState(data.alerts);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [falseAlarms, setFalseAlarms] = useState([]);
+  const [markedAsFalseAlarms, setMarkedAsFalseAlarms] = useState([]);
 
   useEffect(() => {
     const searchLowerCase = search.toLowerCase();
@@ -65,20 +65,45 @@ function App() {
   const vehicleFriendlyNames = [
     ...new Set(data.alerts.map((alert) => alert.vehicle_friendly_name)),
   ];
+
   const handleRemoveSelectedVehicle = () => {
     setFilteredAlerts(data.alerts);
     setSelectedVehicle(null);
-    setFalseAlarms([]);
+    setMarkedAsFalseAlarms([]);
     setSearch('');
     setStartDate('');
     setEndDate('');
   };
+
   const handleMarkAsFalseAlarm = (alert) => {
-    setFalseAlarms((prevFalseAlarms) => [...prevFalseAlarms, alert]);
+    setMarkedAsFalseAlarms((prevMarkedAsFalseAlarms) => [
+      ...prevMarkedAsFalseAlarms,
+      alert,
+    ]);
   };
+
+  const isMarkedAsFalseAlarm = (alert) => {
+    return markedAsFalseAlarms.includes(alert);
+  };
+
+  const isButtonDisabled = (alert) => {
+    return isMarkedAsFalseAlarm(alert);
+  };
+
+  const getButtonVariant = (alert) => {
+    return isMarkedAsFalseAlarm(alert) ? 'secondary' : 'none outline-secondary';
+  };
+
+  const getButtonText = (alert) => {
+    return isMarkedAsFalseAlarm(alert)
+      ? 'Marked as False Alarm'
+      : 'Mark As False Alarm';
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
   };
+
   return (
     <div>
       <Container>
@@ -149,47 +174,45 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {filteredAlerts.map(
-              (alert) =>
-                // Check if the alert is not in the falseAlarms state
-                !falseAlarms.includes(alert) && (
-                  <tr key={alert.id}>
-                    <td className="alertCard">
-                      <Row>
-                        <Col md={8}>
-                          <p>
-                            <span className="alert-type">
-                              <b>{alert.alert_type}</b>
-                            </span>{' '}
-                            <span className="alert-date time">
-                              <i class="fa-solid fa-circle"></i>{' '}
-                              {formatLocalTimestamp(alert.timestamp)}
-                            </span>
-                          </p>
-                          <p>
-                            <span style={{ fontSize: 'small' }}>
-                              {'  '}
-                              {alert.driver_friendly_name} /{' '}
-                              {alert.vehicle_friendly_name}
-                            </span>
-                          </p>
-                        </Col>
-                        <Col md={4} className="alarm">
-                          <Button
-                            variant="none"
-                            size="sm"
-                            className="oulineBorder"
-                            onClick={() => handleMarkAsFalseAlarm(alert)}
-                          >
-                            <i className="fa-solid fa-bell-slash"></i>
-                            {'    '}Mark As False Alarm
-                          </Button>
-                        </Col>
-                      </Row>
-                    </td>
-                  </tr>
-                )
-            )}
+            {filteredAlerts.map((alert) => (
+              <tr key={alert.id}>
+                <td className="alertCard">
+                  <Row>
+                    <Col md={8}>
+                      <p>
+                        <span className="alert-type">
+                          <b>{alert.alert_type}</b>
+                        </span>{' '}
+                        <span className="alert-date time">
+                          <i className="fa-solid fa-circle"></i>{' '}
+                          {formatLocalTimestamp(alert.timestamp)}
+                        </span>
+                      </p>
+                      <p>
+                        <span style={{ fontSize: 'small' }}>
+                          {'  '}
+                          {alert.driver_friendly_name} /{' '}
+                          {alert.vehicle_friendly_name}
+                        </span>
+                      </p>
+                    </Col>
+                    <Col md={4} className="alarm">
+                      <Button
+                        variant={getButtonVariant(alert)}
+                        size="sm"
+                        className="oulineBorder"
+                        onClick={() => handleMarkAsFalseAlarm(alert)}
+                        disabled={isButtonDisabled(alert)}
+                      >
+                        <i className="fa-solid fa-bell-slash"></i>
+                        {'    '}
+                        {getButtonText(alert)}
+                      </Button>
+                    </Col>
+                  </Row>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Table>
       </Container>
